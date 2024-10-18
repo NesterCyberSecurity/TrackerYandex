@@ -1,0 +1,23 @@
+import os
+
+from yandex_tracker_client import TrackerClient
+client = TrackerClient(token=os.environ['TOKEN'], org_id=os.environ['ORG'])
+
+def handler(event, context):
+    # Формат запроса функции: https://functions.yandexcloud.net/<идентификатор_функции>?id={{issue.key}}
+    issue = client.issues[event['queryStringParameters']['id']]    
+    email = issue.local.mail
+    if not "@" in email:
+       exit()
+    
+    login = email.split('@')[0]
+    try:
+        issue.update(assignee=login)
+    except:
+        issue.update(assignee=email)
+    
+
+    return {
+        'statusCode': 200,
+        'body':  "Ok"
+    }
